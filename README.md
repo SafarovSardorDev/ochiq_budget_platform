@@ -62,11 +62,6 @@ python manage.py createsuperuser
 ```bash
 python manage.py runserver
 ```
-### Frontend
-```bash
-npm install
-npm start
-```
 ### Brauzerda Platformani ochish:
 - Brauzerda http://127.0.0.1:8000/ manziliga o'ting (yoki frontendning localhost portiga). 🌐
 - Platforma ishga tushganini va barcha funksiyalarni sinab ko'ring. 🧑‍💻
