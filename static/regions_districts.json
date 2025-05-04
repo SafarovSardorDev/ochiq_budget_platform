@@ -1,0 +1,13 @@
+{
+    "regions": [
+        {"name": "Toshkent shahri"},
+        {"name": "Andijon viloyati"},
+        {"name": "Samarqand viloyati"}
+    ],
+    "districts": [
+        {"name": "Chilonzor", "region": "Toshkent shahri"},
+        {"name": "Yunusobod", "region": "Toshkent shahri"},
+        {"name": "Andijon shahri", "region": "Andijon viloyati"},
+        {"name": "Samarqand shahri", "region": "Samarqand viloyati"}
+    ]
+}

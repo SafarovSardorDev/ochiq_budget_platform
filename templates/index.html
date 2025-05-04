@@ -1,0 +1,463 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Ochiq Byudjet platformasiga xush kelibsiz. Davlat xarajatlarini kuzating!">
+    <meta name="keywords" content="ochiq byudjet, davlat xarajatlari, loyihalar, statistika, uzbekistan">
+    <meta name="theme-color" content="#2563eb">
+    <meta property="og:title" content="Bosh sahifa - Ochiq Byudjet">
+    <meta property="og:description" content="Davlat xarajatlarini shaffof tarzda kuzating va nazorat qiling.">
+    <meta property="og:image" content="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.1/css/icon-512x512.png">
+    <title>Bosh sahifa - Ochiq Byudjet</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.2.19/tailwind.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.1/css/all.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.10.4/gsap.min.js" defer></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
+        :root {
+            --primary: #2563eb;
+            --primary-dark: #1e40af;
+            --secondary: #10b981;
+            --tertiary: #f59e0b;
+            --dark: #1f2937;
+            --light: #f3f4f6;
+            --danger: #ef4444;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f9fafb;
+            color: #111827;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .navbar-brand {
+            font-weight: 700;
+            font-size: 1.5rem;
+        }
+
+        .navbar-link {
+            position: relative;
+            padding: 0.5rem 0.75rem;
+            transition: all 0.3s ease;
+        }
+
+        .navbar-link:hover::after {
+            width: 100%;
+        }
+
+        .navbar-link::after {
+            content: "";
+            position: absolute;
+            width: 0;
+            height: 2px;
+            bottom: 0;
+            left: 0;
+            background-color: var(--primary);
+            transition: width 0.3s ease;
+        }
+
+        .active-link::after {
+            width: 100%;
+        }
+
+        .select-container {
+            position: relative;
+            width: 100%;
+            max-width: 200px;
+        }
+
+        .select-container select {
+            appearance: none;
+            width: 100%;
+            padding: 0.5rem 2rem 0.5rem 0.75rem;
+            border: 2px solid #e5e7eb;
+            border-radius: 0.5rem;
+            font-size: 0.875rem;
+            color: #1f2937;
+            outline: none;
+            transition: all 0.3s ease;
+        }
+
+        .select-container select:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+        }
+
+        .select-container::after {
+            content: '\f078';
+            font-family: 'Font Awesome 6 Free';
+            font-weight: 900;
+            position: absolute;
+            right: 0.75rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--primary);
+            pointer-events: none;
+        }
+
+        .map-container {
+            height: 400px;
+            background-color: #e0e7ff;
+            border-radius: 8px;
+            overflow: hidden;
+            position: relative;
+            margin-bottom: 2rem;
+        }
+
+        .project-card {
+            background: white;
+            border-radius: 8px;
+            padding: 1.5rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .project-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+        }
+
+        .loader {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid var(--primary);
+            border-radius: 50%;
+            width: 2rem;
+            height: 2rem;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .mobile-menu {
+            transition: transform 0.3s ease;
+        }
+
+        @media (min-width: 768px) {
+            .select-container select {
+                font-size: 0.875rem;
+            }
+            .navbar-link {
+                font-size: 0.875rem;
+            }
+        }
+
+        @media (max-width: 767px) {
+            .select-container {
+                max-width: 100%;
+            }
+            .map-container {
+                height: 300px;
+            }
+            .project-card {
+                padding: 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Loading Overlay -->
+    <div id="loadingOverlay" class="fixed inset-0 bg-white flex items-center justify-center z-50">
+        <div class="text-center">
+            <div class="loader mb-4"></div>
+            <h2 class="text-xl font-bold text-gray-800">Yuklanmoqda...</h2>
+            <p class="text-gray-600">Iltimos, kuting</p>
+        </div>
+    </div>
+
+    <!-- Navbar -->
+    <nav class="bg-white shadow-md fixed w-full z-50">
+        <div class="container mx-auto px-4">
+            <div class="flex justify-between items-center py-4">
+                <a href="{% url 'index' %}" class="navbar-brand flex items-center">
+                    <i class="fas fa-chart-pie text-blue-600 mr-2"></i>
+                    <span class="text-blue-600">Ochiq</span>
+                    <span class="text-gray-800">Byudjet</span>
+                </a>
+                <div class="flex items-center space-x-4">
+                    <div class="hidden md:flex items-center space-x-4">
+                        <a href="{% url 'index' %}" class="navbar-link active-link text-gray-700 hover:text-blue-600">Bosh sahifa</a>
+                        <a href="{% url 'index' %}#info-types" class="navbar-link text-gray-700 hover:text-blue-600">Barcha loyihalar</a>
+                        <a href="{% url 'index' %}#stats" class="navbar-link text-gray-700 hover:text-blue-600">Statistika</a>
+                        <a href="{% url 'feedback' %}" class="navbar-link text-gray-700 hover:text-blue-600">Fikr-mulohaza</a>
+                    </div>
+                    <div class="select-container">
+                        <select id="regionSelect" name="region" class="region-filter" aria-label="Hududni tanlash">
+                            <option value="all" {% if selected_region == 'all' %}selected{% endif %}>Barcha hududlar</option>
+                            <option value="Toshkent shahri" {% if selected_region == 'Toshkent shahri' %}selected{% endif %}>Toshkent shahri</option>
+                            <option value="Toshkent viloyati" {% if selected_region == 'Toshkent viloyati' %}selected{% endif %}>Toshkent viloyati</option>
+                            <option value="Andijon viloyati" {% if selected_region == 'Andijon viloyati' %}selected{% endif %}>Andijon viloyati</option>
+                            <option value="Farg‘ona viloyati" {% if selected_region == 'Farg‘ona viloyati' %}selected{% endif %}>Farg‘ona viloyati</option>
+                            <option value="Namangan viloyati" {% if selected_region == 'Namangan viloyati' %}selected{% endif %}>Namangan viloyati</option>
+                            <option value="Samarqand viloyati" {% if selected_region == 'Samarqand viloyati' %}selected{% endif %}>Samarqand viloyati</option>
+                            <option value="Buxoro viloyati" {% if selected_region == 'Buxoro viloyati' %}selected{% endif %}>Buxoro viloyati</option>
+                            <option value="Xorazm viloyati" {% if selected_region == 'Xorazm viloyati' %}selected{% endif %}>Xorazm viloyati</option>
+                            <option value="Navoiy viloyati" {% if selected_region == 'Navoiy viloyati' %}selected{% endif %}>Navoiy viloyati</option>
+                            <option value="Qashqadaryo viloyati" {% if selected_region == 'Qashqadaryo viloyati' %}selected{% endif %}>Qashqadaryo viloyati</option>
+                            <option value="Surxondaryo viloyati" {% if selected_region == 'Surxondaryo viloyati' %}selected{% endif %}>Surxondaryo viloyati</option>
+                            <option value="Jizzax viloyati" {% if selected_region == 'Jizzax viloyati' %}selected{% endif %}>Jizzax viloyati</option>
+                            <option value="Sirdaryo viloyati" {% if selected_region == 'Sirdaryo viloyati' %}selected{% endif %}>Sirdaryo viloyati</option>
+                        </select>
+                    </div>
+                    <div class="select-container">
+                        <select id="districtSelect" name="district" class="district-filter" aria-label="Tumanni tanlash">
+                            <option value="" {% if not selected_district %}selected{% endif %}>Barcha tumanlar</option>
+                            <!-- Districts will be populated dynamically -->
+                        </select>
+                    </div>
+                    {% if user.is_authenticated %}
+                        <a href="{% url 'logout' %}" class="hidden md:block bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition text-sm">Chiqish</a>
+                    {% else %}
+                        <a href="{% url 'login' %}" class="hidden md:block bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition text-sm">Kirish</a>
+                    {% endif %}
+                    <button id="mobileMenuButton" class="md:hidden focus:outline-none" aria-label="Menyuni ochish" aria-expanded="false">
+                        <i class="fas fa-bars text-gray-600 text-lg"></i>
+                    </button>
+                </div>
+            </div>
+            <div id="mobileMenu" class="mobile-menu md:hidden bg-white shadow-md absolute top-full left-0 w-full hidden">
+                <div class="flex flex-col p-4 space-y-2">
+                    <a href="{% url 'index' %}" class="block px-4 py-2 text-gray-700 hover:bg-blue-50 rounded">Bosh sahifa</a>
+                    <a href="{% url 'index' %}#info-types" class="block px-4 py-2 text-gray-700 hover:bg-blue-50 rounded">Barcha loyihalar</a>
+                    <a href="{% url 'index' %}#stats" class="block px-4 py-2 text-gray-700 hover:bg-blue-50 rounded">Statistika</a>
+                    <a href="{% url 'feedback' %}" class="block px-4 py-2 text-gray-700 hover:bg-blue-50 rounded">Fikr-mulohaza</a>
+                    <div class="select-container py-2">
+                        <select id="regionSelectMobile" name="region" class="region-filter w-full" aria-label="Hududni tanlash">
+                            <option value="all" {% if selected_region == 'all' %}selected{% endif %}>Barcha hududlar</option>
+                            <option value="Toshkent shahri" {% if selected_region == 'Toshkent shahri' %}selected{% endif %}>Toshkent shahri</option>
+                            <option value="Toshkent viloyati" {% if selected_region == 'Toshkent viloyati' %}selected{% endif %}>Toshkent viloyati</option>
+                            <option value="Andijon viloyati" {% if selected_region == 'Andijon viloyati' %}selected{% endif %}>Andijon viloyati</option>
+                            <option value="Farg‘ona viloyati" {% if selected_region == 'Farg‘ona viloyati' %}selected{% endif %}>Farg‘ona viloyati</option>
+                            <option value="Namangan viloyati" {% if selected_region == 'Namangan viloyati' %}selected{% endif %}>Namangan viloyati</option>
+                            <option value="Samarqand viloyati" {% if selected_region == 'Samarqand viloyati' %}selected{% endif %}>Samarqand viloyati</option>
+                            <option value="Buxoro viloyati" {% if selected_region == 'Buxoro viloyati' %}selected{% endif %}>Buxoro viloyati</option>
+                            <option value="Xorazm viloyati" {% if selected_region == 'Xorazm viloyati' %}selected{% endif %}>Xorazm viloyati</option>
+                            <option value="Navoiy viloyati" {% if selected_region == 'Navoiy viloyati' %}selected{% endif %}>Navoiy viloyati</option>
+                            <option value="Qashqadaryo viloyati" {% if selected_region == 'Qashqadaryo viloyati' %}selected{% endif %}>Qashqadaryo viloyati</option>
+                            <option value="Surxondaryo viloyati" {% if selected_region == 'Surxondaryo viloyati' %}selected{% endif %}>Surxondaryo viloyati</option>
+                            <option value="Jizzax viloyati" {% if selected_region == 'Jizzax viloyati' %}selected{% endif %}>Jizzax viloyati</option>
+                            <option value="Sirdaryo viloyati" {% if selected_region == 'Sirdaryo viloyati' %}selected{% endif %}>Sirdaryo viloyati</option>
+                        </select>
+                    </div>
+                    <div class="select-container py-2">
+                        <select id="districtSelectMobile" name="district" class="district-filter w-full" aria-label="Tumanni tanlash">
+                            <option value="" {% if not selected_district %}selected{% endif %}>Barcha tumanlar</option>
+                            <!-- Districts will be populated dynamically -->
+                        </select>
+                    </div>
+                    {% if user.is_authenticated %}
+                        <a href="{% url 'logout' %}" class="block bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 text-center">Chiqish</a>
+                    {% else %}
+                        <a href="{% url 'login' %}" class="block bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 text-center">Kirish</a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="flex-grow container mx-auto px-4 py-16 pt-24">
+        <section id="dashboard" class="mb-12">
+            <h1 class="text-3xl md:text-4xl font-bold text-gray-800 mb-6">Xush kelibsiz, Ochiq Byudjetga!</h1>
+            <div class="map-container">
+                <div id="mapRegion" class="h-full w-full bg-gray-200 text-center flex items-center justify-center">
+                    <span class="text-lg font-semibold">Xarita: <span id="mapRegionName">{{ selected_region|default:"Barcha hududlar" }}{% if selected_district %} - {{ selected_district }}{% endif %}</span></span>
+                </div>
+            </div>
+        </section>
+
+        <section id="info-types" class="mb-12">
+            <h2 class="text-2xl md:text-3xl font-bold text-gray-800 mb-6">Loyihalar ro‘yxati</h2>
+            <div id="projectsList" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {% for project in projects %}
+                    <a href="{% url 'detail' project.id %}" class="project-card">
+                        <h3 class="font-semibold text-lg text-gray-800">{{ project.title }}</h3>
+                        <p class="text-gray-600">Hudud: {{ project.region }}</p>
+                        <p class="text-gray-600">Tuman: {{ project.district }}</p>
+                        <p class="text-gray-600">Byudjet: {{ project.budget|floatformat:0 }} so‘m</p>
+                        <p class="text-gray-500 text-sm mt-2 line-clamp-2">{{ project.description }}</p>
+                    </a>
+                {% empty %}
+                    <p class="text-gray-600 col-span-full">Tanlangan hududda loyihalar topilmadi.</p>
+                {% endfor %}
+            </div>
+        </section>
+
+        <section id="stats" class="mb-12">
+            <h2 class="text-2xl md:text-3xl font-bold text-gray-800 mb-6">Statistika</h2>
+            <p class="text-gray-600">Jami loyihalar: <span id="totalProjects">{{ projects|length }}</span></p>
+            <p class="text-gray-600">Jami byudjet: <span id="totalBudget">{{ projects|length|default:0|floatformat:0 }} so‘m</span></p>
+        </section>
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-gray-800 text-gray-200 relative z-10">
+        <div class="container mx-auto px-4 py-12">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
+                <div>
+                    <a href="{% url 'index' %}" class="flex items-center mb-4">
+                        <i class="fas fa-chart-pie text-blue-400 mr-2 text-2xl"></i>
+                        <span class="text-white text-xl font-bold">Ochiq<span class="text-blue-400">Byudjet</span></span>
+                    </a>
+                    <p class="text-gray-400 mb-4">Davlat xarajatlarini kuzatish va nazorat qilish uchun markazlashtirilgan platforma.</p>
+                    <div class="flex space-x-4">
+                        <a href="#" class="text-gray-400 hover:text-blue-400 transition"><i class="fab fa-telegram"></i></a>
+                        <a href="#" class="text-gray-400 hover:text-blue-400 transition"><i class="fab fa-facebook"></i></a>
+                        <a href="#" class="text-gray-400 hover:text-blue-400 transition"><i class="fab fa-instagram"></i></a>
+                    </div>
+                </div>
+                <div>
+                    <h3 class="text-lg font-bold mb-4">Foydali havolalar</h3>
+                    <ul class="space-y-2">
+                        <li><a href="{% url 'index' %}" class="text-gray-400 hover:text-blue-400 transition">Bosh sahifa</a></li>
+                        <li><a href="{% url 'index' %}#info-types" class="text-gray-400 hover:text-blue-400 transition">Barcha loyihalar</a></li>
+                        <li><a href="{% url 'index' %}#stats" class="text-gray-400 hover:text-blue-400 transition">Statistika</a></li>
+                        <li><a href="{% url 'feedback' %}" class="text-gray-400 hover:text-blue-400 transition">Fikr-mulohaza</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h3 class="text-lg font-bold mb-4">Hamkorlarimiz</h3>
+                    <ul class="space-y-2">
+                        <li><a href="#" class="text-gray-400 hover:text-blue-400 transition">Moliya vazirligi</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-blue-400 transition">Davlat statistika qo‘mitasi</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h3 class="text-lg font-bold mb-4">Bog‘lanish</h3>
+                    <ul class="space-y-2">
+                        <li class="flex items-center">
+                            <i class="fas fa-map-marker-alt mr-2 text-blue-400"></i>
+                            <span class="text-gray-400">Toshkent sh., Mustakillik ko‘chasi, 5</span>
+                        </li>
+                        <li class="flex items-center">
+                            <i class="fas fa-phone mr-2 text-blue-400"></i>
+                            <span class="text-gray-400">+998 71 123-45-67</span>
+                        </li>
+                        <li class="flex items-center">
+                            <i class="fas fa-envelope mr-2 text-blue-400"></i>
+                            <span class="text-gray-400">info@ochiqbyudjet.uz</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+            <div class="border-t border-gray-700 mt-8 pt-8 text-center text-gray-400">
+                <p>© 2025 Ochiq Byudjet. Barcha huquqlar himoyalangan.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            // Hide loading overlay
+            setTimeout(() => {
+                document.getElementById('loadingOverlay').classList.add('hidden');
+            }, 1000);
+
+            // Mobile menu toggle
+            const mobileMenuButton = document.getElementById('mobileMenuButton');
+            const mobileMenu = document.getElementById('mobileMenu');
+            const menuIcon = mobileMenuButton.querySelector('i');
+            let isMenuOpen = false;
+
+            mobileMenuButton.addEventListener('click', () => {
+                isMenuOpen = !isMenuOpen;
+                mobileMenu.classList.toggle('hidden');
+                menuIcon.classList.toggle('fa-bars');
+                menuIcon.classList.toggle('fa-times');
+                mobileMenuButton.setAttribute('aria-expanded', isMenuOpen);
+                document.body.classList.toggle('overflow-hidden', isMenuOpen);
+
+                if (isMenuOpen) {
+                    gsap.fromTo(mobileMenu, { y: '-100%' }, { y: '0%', duration: 0.3, ease: 'power2.out' });
+                } else {
+                    gsap.to(mobileMenu, { y: '-100%', duration: 0.3, ease: 'power2.in' });
+                }
+            });
+
+            // Sync region and district selects
+            const regionSelect = document.getElementById('regionSelect');
+            const districtSelect = document.getElementById('districtSelect');
+            const regionSelectMobile = document.getElementById('regionSelectMobile');
+            const districtSelectMobile = document.getElementById('districtSelectMobile');
+
+            regionSelect.addEventListener('change', () => {
+                regionSelectMobile.value = regionSelect.value;
+                updateDistricts(regionSelect.value);
+                submitFilters();
+            });
+            regionSelectMobile.addEventListener('change', () => {
+                regionSelect.value = regionSelectMobile.value;
+                updateDistricts(regionSelectMobile.value);
+                submitFilters();
+            });
+            districtSelect.addEventListener('change', () => {
+                districtSelectMobile.value = districtSelect.value;
+                submitFilters();
+            });
+            districtSelectMobile.addEventListener('change', () => {
+                districtSelect.value = districtSelectMobile.value;
+                submitFilters();
+            });
+
+            // District data (mock, ideally fetched from backend or JSON)
+            const districtsByRegion = {
+                "Toshkent shahri": ["Chilonzor", "Yunusobod", "Mirzo Ulug‘bek"],
+                "Toshkent viloyati": ["Chirchiq", "Olmaliq", "Angren"],
+                "Andijon viloyati": ["Andijon shahri", "Asaka", "Shahrixon"],
+                "Samarqand viloyati": ["Samarqand shahri", "Urgut", "Kattaqo‘rg‘on"],
+                // Add more regions and districts as needed
+            };
+
+            function updateDistricts(selectedRegion) {
+                const districtOptions = selectedRegion === 'all' || !districtsByRegion[selectedRegion]
+                    ? ['Barcha tumanlar']
+                    : ['Barcha tumanlar', ...districtsByRegion[selectedRegion]];
+                
+                districtSelect.innerHTML = districtOptions.map(d => 
+                    `<option value="${d === 'Barcha tumanlar' ? '' : d}" ${d === '{{ selected_district }}' ? 'selected' : ''}>${d}</option>`
+                ).join('');
+                districtSelectMobile.innerHTML = districtSelect.innerHTML;
+            }
+
+            // Submit filters to update URL
+            function submitFilters() {
+                const region = regionSelect.value;
+                const district = districtSelect.value;
+                const url = new URL(window.location);
+                url.searchParams.set('region', region);
+                if (district) {
+                    url.searchParams.set('district', district);
+                } else {
+                    url.searchParams.delete('district');
+                }
+                window.location = url.toString();
+            }
+
+            // Initial district population
+            updateDistricts('{{ selected_region|default:"all" }}');
+
+            // GSAP Animations
+            gsap.from(".map-container", {
+                opacity: 0,
+                y: 50,
+                duration: 1,
+                ease: "power2.out"
+            });
+            gsap.from("#projectsList .project-card", {
+                opacity: 0,
+                y: 20,
+                duration: 0.5,
+                stagger: 0.2,
+                ease: "power2.out"
+            });
+        });
+    </script>
+</body>
+</html>

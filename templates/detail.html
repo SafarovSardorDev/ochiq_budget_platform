@@ -1,0 +1,322 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Ochiq Byudjet platformasida loyiha tafsilotlari.">
+    <meta name="keywords" content="ochiq byudjet, loyiha, tafsilotlar, uzbekistan">
+    <meta name="theme-color" content="#2563eb">
+    <meta property="og:title" content="Loyiha Tafsilotlari - Ochiq Byudjet">
+    <meta property="og:description" content="Loyiha haqida batafsil ma'lumot va fikr-mulohazalar.">
+    <meta property="og:image" content="{% static 'icons/icon-512x512.png' %}">
+    <title>Loyiha Tafsilotlari - Ochiq Byudjet</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.2.19/tailwind.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.1/css/all.min.css">
+    <link rel="manifest" href="{% static 'manifest.json' %}">
+    <link rel="icon" type="image/png" href="{% static 'icons/icon-192x192.png' %}">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
+        :root {
+            --primary: #2563eb;
+            --primary-dark: #1e40af;
+            --secondary: #10b981;
+            --tertiary: #f59e0b;
+            --dark: #1f2937;
+            --light: #f3f4f6;
+            --danger: #ef4444;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f9fafb;
+            color: #111827;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .navbar-brand {
+            font-weight: 700;
+            font-size: 1.5rem;
+        }
+
+        .navbar-link {
+            position: relative;
+            padding: 0.5rem 0.75rem;
+            transition: all 0.3s ease;
+            min-width: 0;
+            flex-shrink: 1;
+        }
+
+        .navbar-link:hover::after {
+            width: 100%;
+        }
+
+        .navbar-link::after {
+            content: "";
+            position: absolute;
+            width: 0;
+            height: 2px;
+            bottom: 0;
+            left: 0;
+            background-color: var(--primary);
+            transition: width 0.3s ease;
+        }
+
+        .active-link::after {
+            width: 100%;
+        }
+
+        .project-card {
+            background: white;
+            border-radius: 8px;
+            padding: 1.5rem;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease;
+        }
+
+        .project-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .feedback-card {
+            background: white;
+            border-radius: 8px;
+            padding: 1rem;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+        }
+
+        .loader {
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid var(--primary);
+            border-radius: 50%;
+            width: 1.5rem;
+            height: 1.5rem;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .mobile-menu {
+            transition: transform 0.3s ease;
+        }
+
+        @media (max-width: 767px) {
+            .project-card, .feedback-card {
+                padding: 1rem;
+            }
+            .navbar-link {
+                font-size: 0.875rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Loading Overlay -->
+    <div id="loadingOverlay" class="fixed inset-0 bg-white flex items-center justify-center z-50">
+        <div class="text-center">
+            <div class="loader mb-4"></div>
+            <h2 class="text-xl font-bold text-gray-800">Yuklanmoqda...</h2>
+            <p class="text-gray-600">Iltimos, kuting</p>
+        </div>
+    </div>
+
+    <!-- Navbar -->
+    <nav class="bg-white shadow-md fixed w-full z-50">
+        <div class="container mx-auto px-4">
+            <div class="flex justify-between items-center py-4">
+                <a href="{% url 'index' %}" class="navbar-brand flex items-center">
+                    <i class="fas fa-chart-pie text-blue-600 mr-2"></i>
+                    <span class="text-blue-600">Ochiq</span>
+                    <span class="text-gray-800">Byudjet</span>
+                </a>
+                <div class="flex items-center space-x-2">
+                    <div class="hidden md:flex items-center space-x-2 flex-shrink">
+                        <a href="{% url 'index' %}#dashboard" class="navbar-link active-link text-gray-700 hover:text-blue-600">Bosh sahifa</a>
+                        <a href="{% url 'index' %}#info-types" class="navbar-link text-gray-700 hover:text-blue-600">Barcha loyihalar</a>
+                        <a href="{% url 'index' %}#stats" class="navbar-link text-gray-700 hover:text-blue-600">Statistika</a>
+                        <a href="{% url 'feedback' %}" class="navbar-link text-gray-700 hover:text-blue-600">Fikr-mulohaza</a>
+                        <a href="{% url 'user_page' %}" class="navbar-link text-gray-700 hover:text-blue-600">Profil</a>
+                        {% if user.is_staff %}
+                            <a href="{% url 'admin_page' %}" class="navbar-link text-gray-700 hover:text-blue-600">Admin</a>
+                        {% endif %}
+                    </div>
+                    {% if user.is_authenticated %}
+                        <a href="{% url 'logout' %}" class="hidden md:block bg-blue-600 text-white px-3 py-1.5 rounded-lg hover:bg-blue-700 transition text-sm max-w-[120px] flex-shrink">Chiqish</a>
+                    {% else %}
+                        <a href="{% url 'login' %}" class="hidden md:block bg-blue-600 text-white px-3 py-1.5 rounded-lg hover:bg-blue-700 transition text-sm max-w-[120px] flex-shrink">Kirish</a>
+                    {% endif %}
+                    <button id="mobileMenuButton" class="md:hidden focus:outline-none" aria-label="Menyuni ochish" aria-expanded="false" aria-controls="mobileMenu">
+                        <i class="fas fa-bars text-gray-600 text-lg"></i>
+                    </button>
+                </div>
+            </div>
+            <div id="mobileMenu" class="mobile-menu md:hidden bg-white shadow-md absolute top-full left-0 w-full hidden">
+                <div class="flex flex-col p-4 space-y-2">
+                    <a href="{% url 'index' %}#dashboard" class="block px-4 py-2 text-gray-700 hover:bg-blue-50 rounded">Bosh sahifa</a>
+                    <a href="{% url 'index' %}#info-types" class="block px-4 py-2 text-gray-700 hover:bg-blue-50 rounded">Barcha loyihalar</a>
+                    <a href="{% url 'index' %}#stats" class="block px-4 py-2 text-gray-700 hover:bg-blue-50 rounded">Statistika</a>
+                    <a href="{% url 'feedback' %}" class="block px-4 py-2 text-gray-700 hover:bg-blue-50 rounded">Fikr-mulohaza</a>
+                    <a href="{% url 'user_page' %}" class="block px-4 py-2 text-gray-700 hover:bg-blue-50 rounded">Profil</a>
+                    {% if user.is_staff %}
+                        <a href="{% url 'admin_page' %}" class="block px-4 py-2 text-gray-700 hover:bg-blue-50 rounded">Admin</a>
+                    {% endif %}
+                    {% if user.is_authenticated %}
+                        <a href="{% url 'logout' %}" class="block bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 text-center">Chiqish</a>
+                    {% else %}
+                        <a href="{% url 'login' %}" class="block bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 text-center">Kirish</a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="flex-grow container mx-auto px-4 py-12 pt-20">
+        {% if messages %}
+            {% for message in messages %}
+                <div class="bg-{% if message.tags == 'success' %}green{% else %}red{% endif %}-600 text-white p-4 rounded-lg mb-4">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        {% endif %}
+
+        <section class="mb-12">
+            <h2 class="text-3xl font-bold text-gray-800 mb-6">{{ project.title }}</h2>
+            <div class="project-card">
+                <p class="text-gray-600 mb-4">{{ project.description }}</p>
+                <p class="text-sm text-gray-600">Viloyat: <span>{{ project.region }}</span></p>
+                <p class="text-sm text-gray-600">Tuman: <span>{{ project.district }}</span></p>
+                <p class="text-sm text-gray-600">Byudjet: <span>{{ project.budget | floatformat:0 | intcomma }} UZS</span></p>
+                <p class="text-sm text-gray-600">Holati: <span>Faol</span></p> <!-- Hozircha statik, keyin dinamik qilinadi -->
+            </div>
+        </section>
+
+        <section>
+            <h2 class="text-2xl font-bold text-gray-800 mb-6">Fikr-mulohazalar</h2>
+            <div id="feedbackList" class="space-y-4">
+                <!-- Hozircha statik fikrlar -->
+                <div class="feedback-card">
+                    <p class="text-sm text-gray-600">Foydalanuvchi: Admin</p>
+                    <p class="text-sm text-gray-600">Turi: Taklif</p>
+                    <p class="text-gray-800">Bu loyiha juda foydali bo‘ladi, lekin qurilish muddatini qisqartirish kerak.</p>
+                    <p class="text-sm text-gray-600 mt-2">Holati: Qabul qilingan</p>
+                </div>
+                <div class="feedback-card">
+                    <p class="text-sm text-gray-600">Foydalanuvchi: User1</p>
+                    <p class="text-sm text-gray-600">Turi: Shikoyat</p>
+                    <p class="text-gray-800">Qurilish jarayonida shovqin ko‘p bo‘lyapti.</p>
+                    <p class="text-sm text-gray-600 mt-2">Holati: Tasdiqlanmagan</p>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-gray-800 text-gray-200 relative z-10">
+        <div class="container mx-auto px-4 py-12">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
+                <div>
+                    <a href="{% url 'index' %}" class="flex items-center mb-4">
+                        <i class="fas fa-chart-pie text-blue-400 mr-2 text-2xl"></i>
+                        <span class="text-white text-xl font-bold">Ochiq<span class="text-blue-400">Byudjet</span></span>
+                    </a>
+                    <p class="text-gray-400 mb-4">Davlat xarajatlarini kuzatish va nazorat qilish uchun markazlashtirilgan platforma.</p>
+                    <div class="flex space-x-4">
+                        <a href="#" class="text-gray-400 hover:text-blue-400 transition"><i class="fab fa-telegram"></i></a>
+                        <a href="#" class="text-gray-400 hover:text-blue-400 transition"><i class="fab fa-facebook"></i></a>
+                        <a href="#" class="text-gray-400 hover:text-blue-400 transition"><i class="fab fa-instagram"></i></a>
+                    </div>
+                </div>
+                <div>
+                    <h3 class="text-lg font-bold mb-4">Foydali havolalar</h3>
+                    <ul class="space-y-2">
+                        <li><a href="{% url 'index' %}#dashboard" class="text-gray-400 hover:text-blue-400 transition">Bosh sahifa</a></li>
+                        <li><a href="{% url 'index' %}#info-types" class="text-gray-400 hover:text-blue-400 transition">Barcha loyihalar</a></li>
+                        <li><a href="{% url 'index' %}#stats" class="text-gray-400 hover:text-blue-400 transition">Statistika</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h3 class="text-lg font-bold mb-4">Hamkorlarimiz</h3>
+                    <ul class="space-y-2">
+                        <li><a href="#" class="text-gray-400 hover:text-blue-400 transition">Moliya vazirligi</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-blue-400 transition">Davlat statistika qo‘mitasi</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h3 class="text-lg font-bold mb-4">Bog‘lanish</h3>
+                    <ul class="space-y-2">
+                        <li class="flex items-center">
+                            <i class="fas fa-map-marker-alt mr-2 text-blue-400"></i>
+                            <span class="text-gray-400">Toshkent sh., Mustakillik ko‘chasi, 5</span>
+                        </li>
+                        <li class="flex items-center">
+                            <i class="fas fa-phone mr-2 text-blue-400"></i>
+                            <span class="text-gray-400">+998 71 123-45-67</span>
+                        </li>
+                        <li class="flex items-center">
+                            <i class="fas fa-envelope mr-2 text-blue-400"></i>
+                            <span class="text-gray-400">info@ochiqbyudjet.uz</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+            <div class="border-t border-gray-700 mt-8 pt-8 text-center text-gray-400">
+                <p>© 2025 Ochiq Byudjet. Barcha huquqlar himoyalangan.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.10.4/gsap.min.js" defer></script>
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            // Hide loading overlay
+            setTimeout(() => {
+                document.getElementById('loadingOverlay').classList.add('hidden');
+            }, 1500);
+
+            // Mobile menu toggle
+            const mobileMenuButton = document.getElementById('mobileMenuButton');
+            const mobileMenu = document.getElementById('mobileMenu');
+            const menuIcon = mobileMenuButton.querySelector('i');
+            let isMenuOpen = false;
+
+            mobileMenuButton.addEventListener('click', () => {
+                isMenuOpen = !isMenuOpen;
+                mobileMenu.classList.toggle('hidden');
+                menuIcon.classList.toggle('fa-bars');
+                menuIcon.classList.toggle('fa-times');
+                mobileMenuButton.setAttribute('aria-expanded', isMenuOpen);
+                document.body.classList.toggle('overflow-hidden', isMenuOpen);
+
+                if (isMenuOpen) {
+                    gsap.fromTo(mobileMenu, { y: '-100%' }, { y: '0%', duration: 0.3, ease: 'power2.out' });
+                } else {
+                    gsap.to(mobileMenu, { y: '-100%', duration: 0.3, ease: 'power2.in' });
+                }
+            });
+
+            // GSAP Animations
+            gsap.from(".project-card", {
+                opacity: 0,
+                y: 50,
+                duration: 1,
+                ease: "power2.out"
+            });
+
+            gsap.from("#feedbackList .feedback-card", {
+                opacity: 0,
+                y: 20,
+                duration: 0.5,
+                stagger: 0.2,
+                ease: "power2.out"
+            });
+        });
+    </script>
+</body>
+</html>

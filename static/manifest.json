@@ -1,0 +1,15 @@
+{
+    "name": "Ochiq Byudjet",
+    "short_name": "OchiqByudjet",
+    "start_url": "/",
+    "display": "standalone",
+    "background_color": "#2563eb",
+    "theme_color": "#2563eb",
+    "icons": [
+        {
+            "src": "/static/icons/icon-192x192.png",
+            "sizes": "192x192",
+            "type": "image/png"
+        }
+    ]
+}

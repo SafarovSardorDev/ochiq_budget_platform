@@ -1,0 +1,700 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Ochiq Byudjet platformasiga kirish.">
+    <meta name="keywords" content="ochiq byudjet, kirish, login, uzbekistan">
+    <meta name="theme-color" content="#2563eb">
+    <meta property="og:title" content="Kirish - Ochiq Byudjet">
+    <meta property="og:description" content="Ochiq Byudjet platformasiga kiring va davlat xarajatlarini kuzating.">
+    <meta property="og:image" content="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.1/css/icon-512x512.png">
+    <title>Kirish - Ochiq Byudjet</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.2.19/tailwind.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.1/css/all.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.10.4/gsap.min.js" defer></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
+        :root {
+            --primary: #2563eb;
+            --primary-dark: #1e40af;
+            --secondary: #10b981;
+            --tertiary: #f59e0b;
+            --dark: #1f2937;
+            --light: #f3f4f6;
+            --danger: #ef4444;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f9fafb;
+            color: #111827;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .navbar-brand {
+            font-weight: 700;
+            font-size: 1.5rem;
+        }
+
+        .navbar-link {
+            position: relative;
+            padding: 0.5rem 0.75rem;
+            transition: all 0.3s ease;
+            min-width: 0;
+            flex-shrink: 1;
+        }
+
+        .navbar-link:hover::after {
+            width: 100%;
+        }
+
+        .navbar-link::after {
+            content: "";
+            position: absolute;
+            width: 0;
+            height: 2px;
+            bottom: 0;
+            left: 0;
+            background-color: var(--primary);
+            transition: width 0.3s ease;
+        }
+
+        .active-link::after {
+            width: 100%;
+        }
+
+        .select-container {
+            position: relative;
+            width: 100%;
+            max-width: 150px;
+        }
+
+        .select-container select {
+            appearance: none;
+            width: 100%;
+            padding: 0.5rem 2rem 0.5rem 0.75rem;
+            border: 2px solid #e5e7eb;
+            border-radius: 0.5rem;
+            font-size: 0.875rem;
+            color: #1f2937;
+            outline: none;
+            transition: all 0.3s ease;
+            min-width: 0;
+            flex-shrink: 1;
+        }
+
+        .select-container select:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+        }
+
+        .select-container::after {
+            content: '\f078';
+            font-family: 'Font Awesome 6 Free';
+            font-weight: 900;
+            position: absolute;
+            right: 0.75rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--primary);
+            pointer-events: none;
+        }
+
+        .login-container {
+            max-width: 400px;
+            width: 100%;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            padding: 2rem;
+            position: relative;
+        }
+
+        .input-container {
+            position: relative;
+            margin-bottom: 1.5rem;
+        }
+
+        .input-field {
+            width: 100%;
+            padding: 0.75rem 0.75rem 0.75rem 2.5rem;
+            border: 2px solid #e5e7eb;
+            border-radius: 6px;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        .input-field:focus {
+            border-color: var(--primary);
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+        }
+
+        .input-field ~ label {
+            position: absolute;
+            left: 2.5rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #6b7280;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            pointer-events: none;
+            background: white;
+            padding: 0 0.25rem;
+        }
+
+        .input-field:focus ~ label,
+        .input-field:not(:placeholder-shown) ~ label {
+            top: 0;
+            font-size: 0.75rem;
+            color: var(--primary);
+        }
+
+        .input-icon {
+            position: absolute;
+            left: 0.75rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #6b7280;
+        }
+
+        .login-btn {
+            background-color: var(--primary);
+            color: white;
+            padding: 0.75rem;
+            border-radius: 6px;
+            width: 100%;
+            font-weight: 500;
+            transition: background-color 0.3s ease;
+        }
+
+        .login-btn:hover {
+            background-color: var(--primary-dark);
+        }
+
+        .error-message {
+            color: var(--danger);
+            font-size: 0.75rem;
+            margin-top: 0.25rem;
+            display: none;
+        }
+
+        .loader {
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid var(--primary);
+            border-radius: 50%;
+            width: 1.5rem;
+            height: 1.5rem;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .mobile-menu {
+            transition: transform 0.3s ease;
+        }
+
+        @media (min-width: 768px) {
+            .select-container select {
+                font-size: 0.875rem;
+            }
+            .navbar-link {
+                font-size: 0.875rem;
+            }
+        }
+
+        @media (max-width: 767px) {
+            .login-container {
+                margin: 1rem;
+                padding: 1.5rem;
+            }
+            .input-field {
+                padding: 0.5rem 0.5rem 0.5rem 2rem;
+                font-size: 0.875rem;
+            }
+            .input-field ~ label {
+                left: 2rem;
+                font-size: 0.875rem;
+            }
+            .input-field:focus ~ label,
+            .input-field:not(:placeholder-shown) ~ label {
+                font-size: 0.625rem;
+            }
+            .input-icon {
+                left: 0.5rem;
+            }
+            .select-container {
+                max-width: 100%;
+            }
+            .login-btn {
+                padding: 0.5rem;
+                font-size: 0.875rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Loading Overlay -->
+    <div id="loadingOverlay" class="fixed inset-0 bg-white flex items-center justify-center z-50">
+        <div class="text-center">
+            <div class="loader mb-4"></div>
+            <h2 class="text-xl font-bold text-gray-800">Yuklanmoqda...</h2>
+            <p class="text-gray-600">Iltimos, kuting</p>
+        </div>
+    </div>
+
+    <!-- Navbar -->
+    <nav class="bg-white shadow-md fixed w-full z-50">
+        <div class="container mx-auto px-4">
+            <div class="flex justify-between items-center py-4">
+                <a href="{% url 'index' %}" class="navbar-brand flex items-center">
+                    <i class="fas fa-chart-pie text-blue-600 mr-2"></i>
+                    <span class="text-blue-600">Ochiq</span>
+                    <span class="text-gray-800">Byudjet</span>
+                </a>
+                <div class="flex items-center space-x-2">
+                    <div class="hidden md:flex items-center space-x-2 flex-shrink">
+                        <a href="{% url 'index' %}#dashboard" class="navbar-link active-link text-gray-700 hover:text-blue-600">Bosh sahifa</a>
+                        <a href="{% url 'index' %}#info-types" class="navbar-link text-gray-700 hover:text-blue-600">Barcha loyihalar</a>
+                        <a href="{% url 'index' %}#stats" class="navbar-link text-gray-700 hover:text-blue-600">Statistika</a>
+                    </div>
+                    <div class="hidden md:block select-container flex-shrink">
+                        <select id="regionSelect" class="region-filter" aria-label="Hududni tanlash">
+                            <option value="all">Barcha hududlar</option>
+                            <option value="Toshkent shahri">Toshkent shahri</option>
+                            <option value="Toshkent viloyati">Toshkent viloyati</option>
+                            <option value="Andijon viloyati">Andijon viloyati</option>
+                            <option value="Farg‘ona viloyati">Farg‘ona viloyati</option>
+                            <option value="Namangan viloyati">Namangan viloyati</option>
+                            <option value="Samarqand viloyati">Samarqand viloyati</option>
+                            <option value="Buxoro viloyati">Buxoro viloyati</option>
+                            <option value="Xorazm viloyati">Xorazm viloyati</option>
+                            <option value="Navoiy viloyati">Navoiy viloyati</option>
+                            <option value="Qashqadaryo viloyati">Qashqadaryo viloyati</option>
+                            <option value="Surxondaryo viloyati">Surxondaryo viloyati</option>
+                            <option value="Jizzax viloyati">Jizzax viloyati</option>
+                            <option value="Sirdaryo viloyati">Sirdaryo viloyati</option>
+                        </select>
+                    </div>
+                    {% if user.is_authenticated %}
+                        <a href="{% url 'logout' %}" class="hidden md:block bg-blue-600 text-white px-3 py-1.5 rounded-lg hover:bg-blue-700 transition text-sm max-w-[120px] flex-shrink">Chiqish</a>
+                    {% else %}
+                        <a href="{% url 'register' %}" class="hidden md:block bg-blue-600 text-white px-3 py-1.5 rounded-lg hover:bg-blue-700 transition text-sm max-w-[120px] flex-shrink">Ro‘yxatdan o‘tish</a>
+                    {% endif %}
+                    <button id="mobileMenuButton" class="md:hidden focus:outline-none" aria-label="Menyuni ochish" aria-expanded="false" aria-controls="mobileMenu">
+                        <i class="fas fa-bars text-gray-600 text-lg"></i>
+                    </button>
+                </div>
+            </div>
+            <div id="mobileMenu" class="mobile-menu md:hidden bg-white shadow-md absolute top-full left-0 w-full hidden">
+                <div class="flex flex-col p-4 space-y-2">
+                    <a href="{% url 'index' %}#dashboard" class="block px-4 py-2 text-gray-700 hover:bg-blue-50 rounded">Bosh sahifa</a>
+                    <a href="{% url 'index' %}#info-types" class="block px-4 py-2 text-gray-700 hover:bg-blue-50 rounded">Barcha loyihalar</a>
+                    <a href="{% url 'index' %}#stats" class="block px-4 py-2 text-gray-700 hover:bg-blue-50 rounded">Statistika</a>
+                    <div class="select-container py-2">
+                        <select id="regionSelectMobile" class="region-filter w-full" aria-label="Hududni tanlash">
+                            <option value="all">Barcha hududlar</option>
+                            <option value="Toshkent shahri">Toshkent shahri</option>
+                            <option value="Toshkent viloyati">Toshkent viloyati</option>
+                            <option value="Andijon viloyati">Andijon viloyati</option>
+                            <option value="Farg‘ona viloyati">Farg‘ona viloyati</option>
+                            <option value="Namangan viloyati">Namangan viloyati</option>
+                            <option value="Samarqand viloyati">Samarqand viloyati</option>
+                            <option value="Buxoro viloyati">Buxoro viloyati</option>
+                            <option value="Xorazm viloyati">Xorazm viloyati</option>
+                            <option value="Navoiy viloyati">Navoiy viloyati</option>
+                            <option value="Qashqadaryo viloyati">Qashqadaryo viloyati</option>
+                            <option value="Surxondaryo viloyati">Surxondaryo viloyati</option>
+                            <option value="Jizzax viloyati">Jizzax viloyati</option>
+                            <option value="Sirdaryo viloyati">Sirdaryo viloyati</option>
+                        </select>
+                    </div>
+                    {% if user.is_authenticated %}
+                        <a href="{% url 'logout' %}" class="block bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 text-center">Chiqish</a>
+                    {% else %}
+                        <a href="{% url 'register' %}" class="block bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 text-center">Ro‘yxatdan o‘tish</a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="flex-grow flex items-center justify-center pt-20">
+        <div class="login-container">
+            <h2 class="text-2xl font-bold text-gray-800 mb-6 text-center">Tizimga kirish</h2>
+            {% if messages %}
+                {% for message in messages %}
+                    <div class="bg-{% if message.tags == 'success' %}green{% else %}red{% endif %}-600 text-white p-4 rounded-lg mb-4">
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            {% endif %}
+            <form id="loginForm" method="post" action="{% url 'login' %}">
+                {% csrf_token %}
+                <div class="input-container">
+                    <input type="text" id="username" name="username" class="input-field" placeholder=" " required aria-describedby="usernameError">
+                    <label for="username">Login</label>
+                    <i class="fas fa-user input-icon"></i>
+                    <p id="usernameError" class="error-message">Loginni kiriting!</p>
+                </div>
+                <div class="input-container">
+                    <input type="password" id="password" name="password" class="input-field" placeholder=" " required aria-describedby="passwordError">
+                    <label for="password">Parol</label>
+                    <i class="fas fa-lock input-icon"></i>
+                    <p id="passwordError" class="error-message">Parolni kiriting!</p>
+                </div>
+                <div class="input-container">
+                    <select id="region" name="region" class="select-field" required aria-describedby="regionError">
+                        <option value="" disabled selected>Hududni tanlang</option>
+                        <option value="Toshkent shahri">Toshkent shahri</option>
+                        <option value="Toshkent viloyati">Toshkent viloyati</option>
+                        <option value="Andijon viloyati">Andijon viloyati</option>
+                        <option value="Farg‘ona viloyati">Farg‘ona viloyati</option>
+                        <option value="Namangan viloyati">Namangan viloyati</option>
+                        <option value="Samarqand viloyati">Samarqand viloyati</option>
+                        <option value="Buxoro viloyati">Buxoro viloyati</option>
+                        <option value="Xorazm viloyati">Xorazm viloyati</option>
+                        <option value="Navoiy viloyati">Navoiy viloyati</option>
+                        <option value="Qashqadaryo viloyati">Qashqadaryo viloyati</option>
+                        <option value="Surxondaryo viloyati">Surxondaryo viloyati</option>
+                        <option value="Jizzax viloyati">Jizzax viloyati</option>
+                        <option value="Sirdaryo viloyati">Sirdaryo viloyati</option>
+                    </select>
+                    <label for="region">Hudud</label>
+                    <i class="fas fa-map-marker-alt input-icon"></i>
+                    <p id="regionError" class="error-message">Hududni tanlang!</p>
+                </div>
+                <div class="input-container">
+                    <select id="district" name="district" class="select-field" required aria-describedby="districtError">
+                        <option value="" disabled selected>Tumanni tanlang</option>
+                    </select>
+                    <label for="district">Tuman</label>
+                    <i class="fas fa-city input-icon"></i>
+                    <p id="districtError" class="error-message">Tumanni tanlang!</p>
+                </div>
+                <div class="flex justify-between items-center mb-4">
+                    <a href="#" class="text-blue-600 text-sm hover:underline">Parolni unutdingizmi?</a>
+                </div>
+                <button type="submit" class="login-btn">Kirish</button>
+            </form>
+            <p class="text-center text-gray-600 mt-4">
+                Hisobingiz yo‘qmi? <a href="{% url 'register' %}" class="text-blue-600 hover:underline">Ro‘yxatdan o‘ting</a>.
+            </p>
+            <p class="text-center text-gray-600 mt-2">
+                Bosh sahifaga qaytish uchun <a href="{% url 'index' %}" class="text-blue-600 hover:underline">bu yerni bosing</a>.
+            </p>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-gray-800 text-gray-200 relative z-10">
+        <div class="container mx-auto px-4 py-12">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
+                <div>
+                    <a href="{% url 'index' %}" class="flex items-center mb-4">
+                        <i class="fas fa-chart-pie text-blue-400 mr-2 text-2xl"></i>
+                        <span class="text-white text-xl font-bold">Ochiq<span class="text-blue-400">Byudjet</span></span>
+                    </a>
+                    <p class="text-gray-400 mb-4">Davlat xarajatlarini kuzatish va nazorat qilish uchun markazlashtirilgan platforma.</p>
+                    <div class="flex space-x-4">
+                        <a href="#" class="text-gray-400 hover:text-blue-400 transition"><i class="fab fa-telegram"></i></a>
+                        <a href="#" class="text-gray-400 hover:text-blue-400 transition"><i class="fab fa-facebook"></i></a>
+                        <a href="#" class="text-gray-400 hover:text-blue-400 transition"><i class="fab fa-instagram"></i></a>
+                    </div>
+                </div>
+                <div>
+                    <h3 class="text-lg font-bold mb-4">Foydali havolalar</h3>
+                    <ul class="space-y-2">
+                        <li><a href="{% url 'index' %}#dashboard" class="text-gray-400 hover:text-blue-400 transition">Bosh sahifa</a></li>
+                        <li><a href="{% url 'index' %}#info-types" class="text-gray-400 hover:text-blue-400 transition">Barcha loyihalar</a></li>
+                        <li><a href="{% url 'index' %}#stats" class="text-gray-400 hover:text-blue-400 transition">Statistika</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h3 class="text-lg font-bold mb-4">Hamkorlarimiz</h3>
+                    <ul class="space-y-2">
+                        <li><a href="#" class="text-gray-400 hover:text-blue-400 transition">Moliya vazirligi</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-blue-400 transition">Davlat statistika qo‘mitasi</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h3 class="text-lg font-bold mb-4">Bog‘lanish</h3>
+                    <ul class="space-y-2">
+                        <li class="flex items-center">
+                            <i class="fas fa-map-marker-alt mr-2 text-blue-400"></i>
+                            <span class="text-gray-400">Toshkent sh., Mustakillik ko‘chasi, 5</span>
+                        </li>
+                        <li class="flex items-center">
+                            <i class="fas fa-phone mr-2 text-blue-400"></i>
+                            <span class="text-gray-400">+998 71 123-45-67</span>
+                        </li>
+                        <li class="flex items-center">
+                            <i class="fas fa-envelope mr-2 text-blue-400"></i>
+                            <span class="text-gray-400">info@ochiqbyudjet.uz</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+            <div class="border-t border-gray-700 mt-8 pt-8 text-center text-gray-400">
+                <p>© 2025 Ochiq Byudjet. Barcha huquqlar himoyalangan.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            // Hide loading overlay
+            setTimeout(() => {
+                document.getElementById('loadingOverlay').classList.add('hidden');
+            }, 1500);
+
+            // Mobile menu toggle
+            const mobileMenuButton = document.getElementById('mobileMenuButton');
+            const mobileMenu = document.getElementById('mobileMenu');
+            const menuIcon = mobileMenuButton.querySelector('i');
+            let isMenuOpen = false;
+
+            mobileMenuButton.addEventListener('click', () => {
+                isMenuOpen = !isMenuOpen;
+                mobileMenu.classList.toggle('hidden');
+                menuIcon.classList.toggle('fa-bars');
+                menuIcon.classList.toggle('fa-times');
+                mobileMenuButton.setAttribute('aria-expanded', isMenuOpen);
+                document.body.classList.toggle('overflow-hidden', isMenuOpen);
+
+                if (isMenuOpen) {
+                    gsap.fromTo(mobileMenu, { y: '-100%' }, { y: '0%', duration: 0.3, ease: 'power2.out' });
+                } else {
+                    gsap.to(mobileMenu, { y: '-100%', duration: 0.3, ease: 'power2.in' });
+                }
+            });
+
+            // Sync region selects
+            const regionSelect = document.getElementById('regionSelect');
+            const regionSelectMobile = document.getElementById('regionSelectMobile');
+            regionSelect.addEventListener('change', () => regionSelectMobile.value = regionSelect.value);
+            regionSelectMobile.addEventListener('change', () => regionSelect.value = regionSelectMobile.value);
+
+            // Form elements
+            const loginForm = document.getElementById('loginForm');
+            const inputs = {
+                username: document.getElementById('username'),
+                password: document.getElementById('password'),
+                region: document.getElementById('region'),
+                district: document.getElementById('district')
+            };
+            const errors = {
+                username: document.getElementById('usernameError'),
+                password: document.getElementById('passwordError'),
+                region: document.getElementById('regionError'),
+                district: document.getElementById('districtError')
+            };
+
+            // Regions and districts data
+            const regionsData = {
+                regions: [
+                    {
+                        name: "Toshkent shahri",
+                        districts: ["Chilonzor", "Yunusobod", "Mirzo Ulug‘bek", "Sergeli", "Olmazor", "Yakkasaroy", "Shayxontohur", "Chilanzor", "Bektemir", "Mirobod", "Uchtepa"]
+                    },
+                    {
+                        name: "Toshkent viloyati",
+                        districts: ["Bekobod", "Bo‘stonliq", "Bo‘ka", "Chinaz", "Qibray", "Parkent", "Piskent", "O‘rta Chirchiq", "Yangiyo‘l", "Zangiota", "Ohangaron"]
+                    },
+                    {
+                        name: "Andijon viloyati",
+                        districts: ["Andijon shahri", "Asaka", "Baliqchi", "Bo‘z", "Jalolquduq", "Izboskan", "Qo‘rg‘ontepa", "Marhamat", "Oltinko‘l", "Paxtaobod", "Ulug‘nor", "Xonobod", "Xo‘jaobod", "Shahrixon"]
+                    },
+                    {
+                        name: "Farg‘ona viloyati",
+                        districts: ["Farg‘ona shahri", "Beshariq", "Bog‘dod", "Dang‘ara", "Farg‘ona", "Furqat", "Qo‘shtepa", "Quva", "Rishton", "So‘x", "Toshloq", "Uchko‘prik", "Yozavon"]
+                    },
+                    {
+                        name: "Namangan viloyati",
+                        districts: ["Namangan shahri", "Chortoq", "Chust", "Kosonsoy", "Mingbuloq", "Norin", "Pop", "To‘raqo‘rg‘on", "Uychi", "Yangiqo‘rg‘on"]
+                    },
+                    {
+                        name: "Samarqand viloyati",
+                        districts: ["Samarqand shahri", "Bulung‘ur", "Ishtixon", "Jomboy", "Kattaqo‘rg‘on", "Narpay", "Nurobod", "Oqdaryo", "Pastdarg‘om", "Paxtachi", "Payariq", "Toyloq", "Urgut"]
+                    },
+                    {
+                        name: "Buxoro viloyati",
+                        districts: ["Buxoro shahri", "G‘ijduvon", "Jondor", "Kogon", "Olot", "Peshku", "Qorako‘l", "Qorovulbozor", "Romitan", "Shofirkon", "Vobkent"]
+                    },
+                    {
+                        name: "Xorazm viloyati",
+                        districts: ["Urganch shahri", "Bog‘ot", "Gurlan", "Qoshko‘pir", "Shovot", "Xiva", "Xonqa", "Yangiariq", "Yangibozor", "Tuproqqal’a"]
+                    },
+                    {
+                        name: "Navoiy viloyati",
+                        districts: ["Navoiy shahri", "Karmana", "Konimex", "Navbahor", "Nurota", "Tomdi", "Uchkuduk", "Xatirchi"]
+                    },
+                    {
+                        name: "Qashqadaryo viloyati",
+                        districts: ["Qarshi shahri", "Chiroqchi", "Dehqonobod", "G‘uzor", "Qamashi", "Kasbi", "Kitob", "Koson", "Mirishkor", "Muborak", "Nishon", "Shahrisabz", "Yakkabog‘"]
+                    },
+                    {
+                        name: "Surxondaryo viloyati",
+                        districts: ["Termiz shahri", "Angor", "Boysun", "Denov", "Jarqo‘rg‘on", "Qiziriq", "Qumqo‘rg‘on", "Muzrabot", "Sariosiyo", "Sherobod", "Sho‘rchi", "Uzun"]
+                    },
+                    {
+                        name: "Jizzax viloyati",
+                        districts: ["Jizzax shahri", "Arnasoy", "Baxmal", "Do‘stlik", "Forish", "G‘allaorol", "Mirzacho‘l", "Paxtakor", "Yangiobod", "Zafarobod", "Zarbdor"]
+                    },
+                    {
+                        name: "Sirdaryo viloyati",
+                        districts: ["Sirdaryo shahri", "Boyovut", "Guliston", "Mirzaobod", "Oqoltin", "Sardoba", "Sayxunobod", "Xovos"]
+                    }
+                ]
+            };
+
+            // Populate districts based on selected region
+            function populateDistricts(selectedRegion) {
+                const districtSelect = inputs.district;
+                districtSelect.innerHTML = '<option value="" disabled selected>Tumanni tanlang</option>';
+
+                const region = regionsData.regions.find(r => r.name === selectedRegion);
+                if (region && region.districts) {
+                    region.districts.forEach(district => {
+                        const option = document.createElement('option');
+                        option.value = district;
+                        option.textContent = district;
+                        districtSelect.appendChild(option);
+                    });
+                    districtSelect.disabled = false; // Aktivlashtirish
+                } else {
+                    districtSelect.disabled = true; // Agar region topilmasa, disable qilish
+                }
+            }
+
+            // Initial call to populate districts if region is pre-selected
+            if (inputs.region.value) {
+                populateDistricts(inputs.region.value);
+            }
+
+            // Update districts when region changes
+            inputs.region.addEventListener('change', () => {
+                const selectedRegion = inputs.region.value;
+                if (selectedRegion) {
+                    populateDistricts(selectedRegion);
+                    errors.region.style.display = 'none';
+                    inputs.region.removeAttribute('aria-invalid');
+                } else {
+                    districtSelect.innerHTML = '<option value="" disabled selected>Tumanni tanlang</option>';
+                    errors.region.style.display = 'block';
+                    inputs.region.setAttribute('aria-invalid', 'true');
+                }
+            });
+
+            // Real-time validation
+            inputs.username.addEventListener('input', () => {
+                const value = inputs.username.value.trim();
+                if (value) {
+                    errors.username.style.display = 'none';
+                    inputs.username.removeAttribute('aria-invalid');
+                } else {
+                    errors.username.style.display = 'block';
+                    inputs.username.setAttribute('aria-invalid', 'true');
+                }
+            });
+
+            inputs.password.addEventListener('input', () => {
+                const value = inputs.password.value;
+                if (value) {
+                    errors.password.style.display = 'none';
+                    inputs.password.removeAttribute('aria-invalid');
+                } else {
+                    errors.password.style.display = 'block';
+                    inputs.password.setAttribute('aria-invalid', 'true');
+                }
+            });
+
+            inputs.region.addEventListener('change', () => {
+                if (inputs.region.value) {
+                    errors.region.style.display = 'none';
+                    inputs.region.removeAttribute('aria-invalid');
+                } else {
+                    errors.region.style.display = 'block';
+                    inputs.region.setAttribute('aria-invalid', 'true');
+                }
+            });
+
+            inputs.district.addEventListener('change', () => {
+                if (inputs.district.value) {
+                    errors.district.style.display = 'none';
+                    inputs.district.removeAttribute('aria-invalid');
+                } else {
+                    errors.district.style.display = 'block';
+                    inputs.district.setAttribute('aria-invalid', 'true');
+                }
+            });
+
+            // Form submission
+            loginForm.addEventListener('submit', (e) => {
+                e.preventDefault();
+                const formData = {
+                    username: inputs.username.value.trim(),
+                    password: inputs.password.value,
+                    region: inputs.region.value,
+                    district: inputs.district.value
+                };
+
+                let isValid = true;
+
+                if (!formData.username) {
+                    errors.username.style.display = 'block';
+                    inputs.username.setAttribute('aria-invalid', 'true');
+                    isValid = false;
+                }
+
+                if (!formData.password) {
+                    errors.password.style.display = 'block';
+                    inputs.password.setAttribute('aria-invalid', 'true');
+                    isValid = false;
+                }
+
+                if (!formData.region) {
+                    errors.region.style.display = 'block';
+                    inputs.region.setAttribute('aria-invalid', 'true');
+                    isValid = false;
+                }
+
+                if (!formData.district) {
+                    errors.district.style.display = 'block';
+                    inputs.district.setAttribute('aria-invalid', 'true');
+                    isValid = false;
+                }
+
+                if (isValid) {
+                    loginForm.submit();
+                }
+            });
+
+            // GSAP Animations
+            gsap.from(".login-container", {
+                opacity: 0,
+                y: 50,
+                duration: 1,
+                ease: "power2.out"
+            });
+
+            document.querySelectorAll('.input-field, .select-field').forEach(field => {
+                field.addEventListener('focus', () => {
+                    gsap.to(field, { scale: 1.02, duration: 0.2, ease: 'power2.out' });
+                });
+                field.addEventListener('blur', () => {
+                    gsap.to(field, { scale: 1, duration: 0.2, ease: 'power2.in' });
+                });
+            });
+        });
+    </script>
+</body>
+</html>
